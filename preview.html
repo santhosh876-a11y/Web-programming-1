@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RigForge - Gaming PC Builder (Instant Interactive Preview)</title>
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- React 18 & Babel Standalone -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    :root {
+      --gaming-bg-dark: #0a0d14;
+      --gaming-card-bg: #121824;
+      --gaming-border: #1e293b;
+      --gaming-cyan: #00d2ff;
+      --gaming-glow: rgba(0, 210, 255, 0.25);
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--gaming-bg-dark);
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+    h1, h2, h3, h4, .brand-font {
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 0.5px;
+    }
+    .gaming-card {
+      background-color: var(--gaming-card-bg);
+      border: 1px solid var(--gaming-border);
+      border-radius: 12px;
+      transition: all 0.25s ease-in-out;
+    }
+    .gaming-card:hover {
+      border-color: rgba(0, 210, 255, 0.4);
+      box-shadow: 0 8px 24px var(--gaming-glow);
+    }
+    .gaming-card.selected-active {
+      border-color: var(--gaming-cyan);
+      box-shadow: 0 0 20px var(--gaming-glow);
+      background: linear-gradient(145deg, #121d2d, #121824);
+    }
+    .text-neon {
+      color: var(--gaming-cyan) !important;
+      text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+    }
+    .text-gradient {
+      background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .btn-neon {
+      background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+      color: #fff;
+      border: none;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+    .btn-neon:hover {
+      background: linear-gradient(135deg, #00d2ff 0%, #0096c7 100%);
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(0, 210, 255, 0.5);
+    }
+    .btn-outline-neon {
+      background: transparent;
+      color: var(--gaming-cyan);
+      border: 1px solid var(--gaming-cyan);
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .btn-outline-neon:hover {
+      background-color: var(--gaming-cyan);
+      color: #0b0f19;
+      box-shadow: 0 0 15px var(--gaming-glow);
+    }
+    .navbar-gaming {
+      background-color: rgba(10, 13, 20, 0.95);
+      border-bottom: 1px solid var(--gaming-border);
+    }
+    .category-tab {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      transition: all 0.2s;
+    }
+    .category-tab:hover {
+      background: #1a2233;
+      border-color: #38bdf8;
+    }
+    .category-tab.active {
+      background: linear-gradient(90deg, #13273e 0%, #111e2f 100%);
+      border-color: var(--gaming-cyan);
+      box-shadow: 0 0 14px rgba(0, 210, 255, 0.25);
+    }
+    .hardware-img-container {
+      height: 140px;
+      background-color: #0d121c;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-top-left-radius: 11px;
+      border-top-right-radius: 11px;
+    }
+    .hardware-img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .progress-bar-glow-green {
+      background: linear-gradient(90deg, #10b981, #059669);
+    }
+    .progress-bar-glow-yellow {
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+    }
+    .progress-bar-glow-red {
+      background: linear-gradient(90deg, #ef4444, #dc2626);
+    }
+    @media print {
+      body { background: #fff !important; color: #000 !important; }
+      .no-print { display: none !important; }
+      .gaming-card { background: #fff !important; color: #000 !important; border: 1px solid #ccc !important; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- Bootstrap 5 JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Standalone Interactive React Application -->
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // --- DATA ---
+    const CATEGORIES = [
+      { id: 'cpu', name: 'Processor (CPU)', icon: 'bi-cpu', description: 'The brain of your gaming rig' },
+      { id: 'gpu', name: 'Graphics Card (GPU)', icon: 'bi-gpu-card', description: 'Powers gaming frame rates & graphics' },
+      { id: 'motherboard', name: 'Motherboard', icon: 'bi-motherboard', description: 'Connects all your components together' },
+      { id: 'ram', name: 'Memory (RAM)', icon: 'bi-memory', description: 'High-speed memory for smooth multitasking' },
+      { id: 'storage', name: 'Storage (SSD / NVMe)', icon: 'bi-device-hdd', description: 'Ultra-fast game loading and storage' },
+      { id: 'psu', name: 'Power Supply (PSU)', icon: 'bi-lightning-charge', description: 'Clean, reliable wattage for all parts' },
+      { id: 'case', name: 'Cabinet / PC Case', icon: 'bi-box', description: 'Airflow, aesthetics, and component housing' },
+      { id: 'cooler', name: 'CPU Cooler', icon: 'bi-fan', description: 'Keeps temperatures low under heavy gaming' }
+    ];
+
+    const COMPONENTS_DATA = {
+      cpu: [
+        { id: 'cpu-1', name: 'AMD Ryzen 5 5600', brand: 'AMD', category: 'cpu', price: 11499, socket: 'AM4', ramType: 'DDR4', tdp: 65, specs: '6 Cores, 12 Threads, Up to 4.4 GHz, 35MB Cache', popular: true, image: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80' },
+        { id: 'cpu-2', name: 'Intel Core i5-13400F', brand: 'Intel', category: 'cpu', price: 17999, socket: 'LGA1700', ramType: 'DDR4/DDR5', tdp: 65, specs: '10 Cores (6P + 4E), 16 Threads, Up to 4.6 GHz', popular: true, image: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&auto=format&fit=crop&q=80' },
+        { id: 'cpu-3', name: 'AMD Ryzen 5 7600X', brand: 'AMD', category: 'cpu', price: 19899, socket: 'AM5', ramType: 'DDR5', tdp: 105, specs: '6 Cores, 12 Threads, Up to 5.3 GHz, PCIe 5.0 Ready', popular: false, image: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80' },
+        { id: 'cpu-4', name: 'Intel Core i7-14700K', brand: 'Intel', category: 'cpu', price: 36499, socket: 'LGA1700', ramType: 'DDR4/DDR5', tdp: 125, specs: '20 Cores, 28 Threads, Up to 5.6 GHz, 33MB Cache', popular: true, image: 'https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?w=600&auto=format&fit=crop&q=80' }
+      ],
+      gpu: [
+        { id: 'gpu-1', name: 'NVIDIA GTX 1650 4GB', brand: 'Zotac', category: 'gpu', price: 11999, tdp: 75, specs: '4GB GDDR6, 128-bit, 896 CUDA Cores, Budget esports', popular: false, image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80' },
+        { id: 'gpu-2', name: 'AMD Radeon RX 6600 8GB', brand: 'Sapphire', category: 'gpu', price: 19999, tdp: 132, specs: '8GB GDDR6, 128-bit, 1792 Stream Processors, 1080p Value', popular: true, image: 'https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&auto=format&fit=crop&q=80' },
+        { id: 'gpu-3', name: 'NVIDIA RTX 4060 8GB', brand: 'MSI', category: 'gpu', price: 28999, tdp: 115, specs: '8GB GDDR6, DLSS 3.5 Frame Gen, Ray Tracing, 3072 Cores', popular: true, image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80' },
+        { id: 'gpu-4', name: 'NVIDIA RTX 4070 Super 12GB', brand: 'Gigabyte', category: 'gpu', price: 58999, tdp: 220, specs: '12GB GDDR6X, 192-bit, 7168 CUDA Cores, 1440p Beast', popular: true, image: 'https://images.unsplash.com/photo-1591488320449-011701bb6704?w=600&auto=format&fit=crop&q=80' }
+      ],
+      motherboard: [
+        { id: 'mb-1', name: 'MSI B550M PRO-VDH WiFi', brand: 'MSI', category: 'motherboard', price: 9499, socket: 'AM4', ramType: 'DDR4', formFactor: 'Micro-ATX', specs: 'AM4 Socket, Micro-ATX, 4x DDR4 DIMM, PCIe 4.0, WiFi & BT', popular: true, image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80' },
+        { id: 'mb-2', name: 'ASUS Prime B760M-A D4', brand: 'ASUS', category: 'motherboard', price: 13999, socket: 'LGA1700', ramType: 'DDR4', formFactor: 'Micro-ATX', specs: 'Intel LGA1700, Micro-ATX, 4x DDR4 slots, Dual M.2 PCIe 4.0', popular: true, image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80' },
+        { id: 'mb-3', name: 'Gigabyte B650 Gaming X AX', brand: 'Gigabyte', category: 'motherboard', price: 17499, socket: 'AM5', ramType: 'DDR5', formFactor: 'ATX', specs: 'AMD AM5, Full ATX, 4x DDR5 slots, Triple M.2, WiFi 6E', popular: true, image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80' },
+        { id: 'mb-4', name: 'MSI PRO Z790-A WiFi', brand: 'MSI', category: 'motherboard', price: 24999, socket: 'LGA1700', ramType: 'DDR5', formFactor: 'ATX', specs: 'Intel LGA1700, Full ATX, 4x DDR5, PCIe 5.0, 16+1+1 VRM', popular: false, image: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80' }
+      ],
+      ram: [
+        { id: 'ram-1', name: 'Corsair Vengeance LPX 16GB (2x8GB) 3200MHz', brand: 'Corsair', category: 'ram', price: 3499, ramType: 'DDR4', specs: 'DDR4, 3200MHz, CL16, Dual Channel, Aluminum heat spreader', popular: true, image: 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=600&auto=format&fit=crop&q=80' },
+        { id: 'ram-2', name: 'Kingston Fury Beast RGB 16GB (2x8GB) 5600MHz', brand: 'Kingston', category: 'ram', price: 5299, ramType: 'DDR5', specs: 'DDR5, 5600MHz, CL36, Dynamic RGB, Intel XMP 3.0', popular: true, image: 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=600&auto=format&fit=crop&q=80' },
+        { id: 'ram-3', name: 'Corsair Vengeance RGB 32GB (2x16GB) 6000MHz', brand: 'Corsair', category: 'ram', price: 10499, ramType: 'DDR5', specs: 'DDR5, 6000MHz, CL30 AMD EXPO & Intel XMP', popular: true, image: 'https://images.unsplash.com/photo-1562976540-1502c2145186?w=600&auto=format&fit=crop&q=80' }
+      ],
+      storage: [
+        { id: 'ssd-1', name: 'Crucial P3 500GB PCIe 3.0 NVMe', brand: 'Crucial', category: 'storage', price: 3199, specs: 'M.2 NVMe, Up to 3500 MB/s Read, Fast boot times', popular: false, image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=600&auto=format&fit=crop&q=80' },
+        { id: 'ssd-2', name: 'WD Blue SN580 1TB NVMe Gen4', brand: 'Western Digital', category: 'storage', price: 5899, specs: 'PCIe 4.0 x4 M.2, Up to 4150 MB/s Read, 5-Yr Warranty', popular: true, image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=600&auto=format&fit=crop&q=80' },
+        { id: 'ssd-3', name: 'Samsung 990 PRO 1TB PCIe 4.0', brand: 'Samsung', category: 'storage', price: 9999, specs: 'Top Gen4 speed, Up to 7450 MB/s Read, Heatsink ready', popular: true, image: 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=600&auto=format&fit=crop&q=80' }
+      ],
+      psu: [
+        { id: 'psu-1', name: 'Deepcool PK550D 550W 80+ Bronze', brand: 'DeepCool', category: 'psu', price: 3499, wattage: 550, specs: '550 Watts, 80 Plus Bronze Certified, Silent 120mm Fan', popular: true, image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80' },
+        { id: 'psu-2', name: 'Cooler Master MWE 650 V2 Bronze', brand: 'Cooler Master', category: 'psu', price: 5199, wattage: 650, specs: '650 Watts, 80 Plus Bronze, DC-to-DC Circuitry', popular: true, image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80' },
+        { id: 'psu-3', name: 'Corsair RM750e 750W 80+ Gold Modular', brand: 'Corsair', category: 'psu', price: 8999, wattage: 750, specs: '750 Watts, 80+ Gold, ATX 3.0 PCIe 5.0, Fully Modular', popular: true, image: 'https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=600&auto=format&fit=crop&q=80' }
+      ],
+      case: [
+        { id: 'case-1', name: 'Ant Esports ICE-100 Air Mini', brand: 'Ant Esports', category: 'case', price: 2999, supportedFormFactors: ['Micro-ATX', 'Mini-ITX'], specs: 'Micro-ATX Mini Tower, 3x ARGB Fans included, Tempered Glass', popular: false, image: 'https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&auto=format&fit=crop&q=80' },
+        { id: 'case-2', name: 'MSI MAG Forge 120R Airflow', brand: 'MSI', category: 'case', price: 4399, supportedFormFactors: ['ATX', 'Micro-ATX', 'Mini-ITX'], specs: 'Mid-Tower ATX, 4x 120mm ARGB Fans, Mesh Front Panel', popular: true, image: 'https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&auto=format&fit=crop&q=80' },
+        { id: 'case-3', name: 'Lian Li Lancool 216 RGB', brand: 'Lian Li', category: 'case', price: 8499, supportedFormFactors: ['ATX', 'Micro-ATX', 'Mini-ITX'], specs: 'High Airflow Mid-Tower, 2x 160mm Fans, Glass Side Panel', popular: true, image: 'https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&auto=format&fit=crop&q=80' }
+      ],
+      cooler: [
+        { id: 'cooler-1', name: 'AMD Wraith Stealth Stock Cooler', brand: 'AMD', category: 'cooler', price: 699, supportedSockets: ['AM4'], tdpRating: 65, specs: 'Basic stock heatsink, low noise, sufficient for 65W CPUs', popular: false, image: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80' },
+        { id: 'cooler-2', name: 'Deepcool AG400 ARGB Single Tower', brand: 'DeepCool', category: 'cooler', price: 1899, supportedSockets: ['LGA1700', 'AM4', 'AM5'], tdpRating: 220, specs: '4 Heatpipes, 120mm ARGB PWM Fan, Universal brackets', popular: true, image: 'https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=600&auto=format&fit=crop&q=80' },
+        { id: 'cooler-3', name: 'Deepcool LE520 240mm Liquid Cooler', brand: 'DeepCool', category: 'cooler', price: 5499, supportedSockets: ['LGA1700', 'AM4', 'AM5'], tdpRating: 280, specs: '240mm Radiator, Anti-leak Tech, 2x ARGB Fans', popular: true, image: 'https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=600&auto=format&fit=crop&q=80' }
+      ]
+    };
+
+    const PRESET_BUILDS = [
+      { id: 'p1', title: 'Budget Esports Rig', badge: 'Under ₹55k', price: 51893, desc: 'Ryzen 5 5600 + RX 6600 8GB, 16GB DDR4, 500GB SSD', comps: { cpu: 'cpu-1', gpu: 'gpu-2', motherboard: 'mb-1', ram: 'ram-1', storage: 'ssd-1', psu: 'psu-1', case: 'case-1', cooler: 'cooler-1' } },
+      { id: 'p2', title: '1080p Ultra Gaming PC', badge: 'Most Popular', price: 81893, desc: 'Core i5-13400F + RTX 4060 8GB, 16GB RAM, 1TB NVMe Gen4', comps: { cpu: 'cpu-2', gpu: 'gpu-3', motherboard: 'mb-2', ram: 'ram-1', storage: 'ssd-2', psu: 'psu-2', case: 'case-2', cooler: 'cooler-2' } },
+      { id: 'p3', title: '1440p Powerhouse', badge: 'Next-Gen DDR5', price: 135792, desc: 'Ryzen 5 7600X + RTX 4070 Super 12GB, 32GB DDR5, 750W Gold', comps: { cpu: 'cpu-3', gpu: 'gpu-4', motherboard: 'mb-3', ram: 'ram-3', storage: 'ssd-2', psu: 'psu-3', case: 'case-3', cooler: 'cooler-3' } }
+    ];
+
+    const formatINR = (amt) => '₹' + Math.max(0, Math.round(amt || 0)).toLocaleString('en-IN');
+
+    // --- MAIN APP ---
+    function App() {
+      const [view, setView] = useState('builder'); // 'home', 'builder', 'saved', 'compare', 'summary'
+      const [selectedComponents, setSelectedComponents] = useState(() => {
+        try {
+          const s = localStorage.getItem('rigforge_active');
+          return s ? JSON.parse(s) : {};
+        } catch { return {}; }
+      });
+      const [buildName, setBuildName] = useState('My Custom Gaming Rig');
+      const [budget, setBudget] = useState(100000);
+      const [includeGst, setIncludeGst] = useState(false);
+      const [activeCat, setActiveCat] = useState('cpu');
+      const [searchTerm, setSearchTerm] = useState('');
+      const [sortBy, setSortBy] = useState('default');
+      const [savedBuilds, setSavedBuilds] = useState(() => {
+        try {
+          const s = localStorage.getItem('rigforge_saved_builds');
+          return s ? JSON.parse(s) : [];
+        } catch { return []; }
+      });
+      const [toast, setToast] = useState(null);
+
+      useEffect(() => {
+        localStorage.setItem('rigforge_active', JSON.stringify(selectedComponents));
+      }, [selectedComponents]);
+
+      const triggerToast = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 3000);
+      };
+
+      // Calculations
+      const subtotal = useMemo(() => {
+        return Object.values(selectedComponents).reduce((acc, c) => acc + (c?.price || 0), 0);
+      }, [selectedComponents]);
+
+      const gstAmount = includeGst ? Math.round(subtotal * 0.18) : 0;
+      const grandTotal = subtotal + gstAmount;
+      const selectedCount = Object.keys(selectedComponents).length;
+
+      // Compatibility
+      const compatibility = useMemo(() => {
+        const issues = [];
+        const { cpu, gpu, motherboard, ram, psu, case: pcCase, cooler } = selectedComponents;
+        const estPower = (cpu?.tdp || 65) + (gpu?.tdp || 100) + 100;
+        const recPsu = Math.round(estPower * 1.3);
+
+        if (cpu && motherboard && cpu.socket !== motherboard.socket) {
+          issues.push(`Socket mismatch: ${cpu.name} (${cpu.socket}) cannot fit ${motherboard.name} (${motherboard.socket})`);
+        }
+        if (motherboard && ram && !motherboard.ramType.includes(ram.ramType)) {
+          issues.push(`Memory mismatch: ${motherboard.name} requires ${motherboard.ramType}, but ${ram.name} is ${ram.ramType}`);
+        }
+        if (motherboard && pcCase && !pcCase.supportedFormFactors.includes(motherboard.formFactor)) {
+          issues.push(`Case size mismatch: ${pcCase.name} cannot fit ${motherboard.formFactor} motherboard`);
+        }
+        if (psu && psu.wattage < estPower) {
+          issues.push(`Power Deficit: Estimated draw ~${estPower}W exceeds ${psu.name} (${psu.wattage}W)`);
+        }
+        return { isOk: issues.length === 0, issues, estPower, recPsu };
+      }, [selectedComponents]);
+
+      // Budget Analysis
+      const remaining = budget - grandTotal;
+      const isOver = remaining < 0;
+      const percentUsed = Math.min(100, Math.round((grandTotal / budget) * 100));
+
+      const handleSelect = (cat, comp) => {
+        setSelectedComponents(prev => ({ ...prev, [cat]: comp }));
+        triggerToast(`Added ${comp.name}`);
+      };
+
+      const handleRemove = (cat) => {
+        setSelectedComponents(prev => {
+          const next = { ...prev };
+          delete next[cat];
+          return next;
+        });
+      };
+
+      const handleLoadPreset = (preset) => {
+        const newComps = {};
+        Object.entries(preset.comps).forEach(([cat, id]) => {
+          const found = COMPONENTS_DATA[cat]?.find(c => c.id === id);
+          if (found) newComps[cat] = found;
+        });
+        setSelectedComponents(newComps);
+        setBuildName(preset.title);
+        setView('builder');
+        triggerToast(`Loaded ${preset.title}!`);
+      };
+
+      const handleSaveBuild = () => {
+        if (selectedCount === 0) return alert('Select some components first!');
+        const newRecord = {
+          id: 'b-' + Date.now(),
+          name: buildName,
+          components: selectedComponents,
+          total: grandTotal,
+          date: new Date().toLocaleDateString('en-IN')
+        };
+        const updated = [newRecord, ...savedBuilds];
+        setSavedBuilds(updated);
+        localStorage.setItem('rigforge_saved_builds', JSON.stringify(updated));
+        triggerToast(`Saved "${buildName}" to LocalStorage!`);
+      };
+
+      const handleDeleteSaved = (id) => {
+        const updated = savedBuilds.filter(b => b.id !== id);
+        setSavedBuilds(updated);
+        localStorage.setItem('rigforge_saved_builds', JSON.stringify(updated));
+      };
+
+      // Filtered items
+      const itemsList = useMemo(() => {
+        let list = COMPONENTS_DATA[activeCat] || [];
+        if (searchTerm) {
+          list = list.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase()) || i.brand.toLowerCase().includes(searchTerm.toLowerCase()));
+        }
+        if (sortBy === 'asc') list.sort((a,b) => a.price - b.price);
+        if (sortBy === 'desc') list.sort((a,b) => b.price - a.price);
+        return list;
+      }, [activeCat, searchTerm, sortBy]);
+
+      return (
+        <div>
+          {/* Navbar */}
+          <nav className="navbar navbar-expand-lg navbar-dark navbar-gaming sticky-top py-2 px-3">
+            <div className="container">
+              <a className="navbar-brand d-flex align-items-center gap-2 cursor-pointer" onClick={() => setView('home')}>
+                <div className="rounded p-1 bg-info text-dark fw-bold px-2"><i className="bi bi-cpu-fill"></i></div>
+                <span className="brand-font fs-4 text-white">RIG<span className="text-neon">FORGE</span></span>
+              </a>
+
+              <div className="d-flex gap-2">
+                <button className={`btn btn-sm ${view === 'home' ? 'btn-info' : 'btn-outline-secondary'}`} onClick={() => setView('home')}>Home</button>
+                <button className={`btn btn-sm ${view === 'builder' ? 'btn-info' : 'btn-outline-secondary'}`} onClick={() => setView('builder')}>PC Builder</button>
+                <button className={`btn btn-sm ${view === 'saved' ? 'btn-info' : 'btn-outline-secondary'}`} onClick={() => setView('saved')}>Saved Builds ({savedBuilds.length})</button>
+                <button className={`btn btn-sm ${view === 'compare' ? 'btn-info' : 'btn-outline-secondary'}`} onClick={() => setView('compare')}>Compare</button>
+                <button className={`btn btn-sm ${view === 'summary' ? 'btn-info' : 'btn-outline-secondary'}`} onClick={() => setView('summary')}>Summary</button>
+              </div>
+
+              <div className="d-none d-md-flex align-items-center gap-2">
+                <span className="badge bg-dark border border-secondary text-info">{selectedCount}/8 parts</span>
+                <span className="fw-bold text-neon">{formatINR(grandTotal)}</span>
+              </div>
+            </div>
+          </nav>
+
+          {/* Toast */}
+          {toast && (
+            <div className="position-fixed bottom-0 end-0 m-4 p-3 bg-info text-dark rounded-3 shadow fw-bold z-3">
+              <i className="bi bi-info-circle-fill me-2"></i> {toast}
+            </div>
+          )}
+
+          {/* VIEW: HOME */}
+          {view === 'home' && (
+            <div>
+              <div className="py-5 text-center border-bottom border-secondary border-opacity-25" style={{ background: 'linear-gradient(180deg, #0a0d14 0%, #101622 100%)' }}>
+                <div className="container py-4">
+                  <span className="badge bg-dark border border-info text-info mb-2">College Web Programming Project</span>
+                  <h1 className="display-4 fw-bold text-white mb-3">BUILD YOUR DREAM <span className="text-gradient">GAMING PC</span></h1>
+                  <p className="lead text-secondary col-md-8 mx-auto mb-4">
+                    Interactive custom gaming PC configurator with real-time socket and power compatibility checks, live INR price calculation, and budget monitoring.
+                  </p>
+                  <button className="btn btn-neon btn-lg px-4 py-2 me-2" onClick={() => setView('builder')}>
+                    <i className="bi bi-tools me-2"></i> Start Building
+                  </button>
+                  <button className="btn btn-outline-secondary btn-lg px-4 py-2" onClick={() => setView('saved')}>
+                    View Saved Builds
+                  </button>
+                </div>
+              </div>
+
+              {/* Preset Rigs */}
+              <div className="container py-5">
+                <h3 className="text-white fw-bold mb-4">Recommended Prebuilt Gaming PCs</h3>
+                <div className="row g-4">
+                  {PRESET_BUILDS.map(p => (
+                    <div key={p.id} className="col-md-4">
+                      <div className="gaming-card p-4 h-100 d-flex flex-column">
+                        <span className="badge bg-primary align-self-start mb-2">{p.badge}</span>
+                        <h5 className="text-white fw-bold">{p.title}</h5>
+                        <p className="text-secondary small flex-grow-1">{p.desc}</p>
+                        <div className="d-flex justify-content-between align-items-center pt-3 border-top border-secondary">
+                          <span className="fs-5 fw-bold text-neon">{formatINR(p.price)}</span>
+                          <button className="btn btn-sm btn-neon" onClick={() => handleLoadPreset(p)}>Load Build</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: BUILDER */}
+          {view === 'builder' && (
+            <div className="container py-4">
+              <div className="row g-4">
+                {/* Left: Component Selection */}
+                <div className="col-lg-8">
+                  <h4 className="text-white fw-bold mb-3">1. Select Hardware Category</h4>
+                  <div className="row g-2 mb-4">
+                    {CATEGORIES.map(cat => (
+                      <div key={cat.id} className="col-6 col-md-3">
+                        <button
+                          className={`category-tab d-flex justify-content-between align-items-center ${activeCat === cat.id ? 'active' : ''}`}
+                          onClick={() => setActiveCat(cat.id)}
+                        >
+                          <div>
+                            <div className="fw-bold small text-white"><i className={`bi ${cat.icon} me-1 text-info`}></i> {cat.name.split(' ')[0]}</div>
+                            <div className="text-secondary" style={{ fontSize: '0.7rem' }}>
+                              {selectedComponents[cat.id]?.brand || 'None'}
+                            </div>
+                          </div>
+                          {selectedComponents[cat.id] && <i className="bi bi-check-circle-fill text-success"></i>}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Search and Sort */}
+                  <div className="gaming-card p-3 mb-3 d-flex gap-2 flex-wrap align-items-center">
+                    <input
+                      type="text"
+                      className="form-control form-control-sm bg-dark border-secondary text-white w-auto flex-grow-1"
+                      placeholder="Search component..."
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                    />
+                    <select
+                      className="form-select form-select-sm bg-dark border-secondary text-white w-auto"
+                      value={sortBy}
+                      onChange={e => setSortBy(e.target.value)}
+                    >
+                      <option value="default">Default Sort</option>
+                      <option value="asc">Price: Low to High</option>
+                      <option value="desc">Price: High to Low</option>
+                    </select>
+                  </div>
+
+                  {/* Component Cards Grid */}
+                  <div className="row g-3">
+                    {itemsList.map(item => {
+                      const isSel = selectedComponents[activeCat]?.id === item.id;
+                      return (
+                        <div key={item.id} className="col-md-6">
+                          <div className={`gaming-card p-3 h-100 d-flex flex-column ${isSel ? 'selected-active' : ''}`}>
+                            <div className="d-flex justify-content-between align-items-start mb-2">
+                              <span className="badge bg-dark border border-secondary text-info">{item.brand}</span>
+                              {item.socket && <span className="badge bg-secondary">{item.socket}</span>}
+                              {item.ramType && <span className="badge bg-secondary">{item.ramType}</span>}
+                            </div>
+                            <h6 className="text-white fw-bold mb-1">{item.name}</h6>
+                            <p className="text-secondary small flex-grow-1" style={{ fontSize: '0.8rem' }}>{item.specs}</p>
+                            <div className="d-flex justify-content-between align-items-center pt-2 border-top border-secondary mt-auto">
+                              <span className="fs-5 fw-bold text-neon">{formatINR(item.price)}</span>
+                              {isSel ? (
+                                <button className="btn btn-sm btn-outline-danger" onClick={() => handleRemove(activeCat)}>Remove</button>
+                              ) : (
+                                <button className="btn btn-sm btn-outline-neon" onClick={() => handleSelect(activeCat, item)}>Select</button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Right: Summary, Budget & Compatibility */}
+                <div className="col-lg-4">
+                  {/* Price Summary */}
+                  <div className="gaming-card p-3 mb-3">
+                    <h5 className="text-white fw-bold mb-2">Build Summary</h5>
+                    <input
+                      type="text"
+                      className="form-control form-control-sm bg-dark border-secondary text-white mb-3"
+                      value={buildName}
+                      onChange={e => setBuildName(e.target.value)}
+                    />
+                    <div className="form-check form-switch mb-3">
+                      <input className="form-check-input" type="checkbox" checked={includeGst} onChange={e => setIncludeGst(e.target.checked)} id="gst" />
+                      <label className="form-check-label small text-secondary" htmlFor="gst">Include 18% GST ({formatINR(gstAmount)})</label>
+                    </div>
+                    <div className="d-flex justify-content-between text-secondary small mb-1">
+                      <span>Subtotal:</span>
+                      <span className="text-white">{formatINR(subtotal)}</span>
+                    </div>
+                    <div className="d-flex justify-content-between fs-5 fw-bold text-white pt-2 border-top border-secondary mb-3">
+                      <span>Total:</span>
+                      <span className="text-neon">{formatINR(grandTotal)}</span>
+                    </div>
+                    <button className="btn btn-neon w-100 mb-2" onClick={handleSaveBuild} disabled={selectedCount === 0}>
+                      <i className="bi bi-bookmark-plus me-1"></i> Save Build
+                    </button>
+                    <button className="btn btn-outline-secondary btn-sm w-100" onClick={() => setSelectedComponents({})}>
+                      Clear All
+                    </button>
+                  </div>
+
+                  {/* Budget Planner */}
+                  <div className="gaming-card p-3 mb-3">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <h6 className="text-white fw-bold mb-0">Budget Planner</h6>
+                      <span className={`badge ${isOver ? 'bg-danger' : 'bg-success'}`}>{isOver ? 'Over Budget' : 'Within Budget'}</span>
+                    </div>
+                    <div className="d-flex gap-1 mb-2">
+                      {[50000, 75000, 100000, 150000].map(amt => (
+                        <button key={amt} className={`btn btn-sm ${budget === amt ? 'btn-info' : 'btn-outline-secondary'}`} onClick={() => setBudget(amt)}>
+                          ₹{amt/1000}k
+                        </button>
+                      ))}
+                    </div>
+                    <div className="progress mb-2" style={{ height: '8px' }}>
+                      <div className={`progress-bar ${isOver ? 'progress-bar-glow-red' : 'progress-bar-glow-green'}`} style={{ width: `${percentUsed}%` }}></div>
+                    </div>
+                    <div className="d-flex justify-content-between small text-secondary">
+                      <span>Target: {formatINR(budget)}</span>
+                      <span className={isOver ? 'text-danger fw-bold' : 'text-success fw-bold'}>
+                        {isOver ? `+${formatINR(Math.abs(remaining))}` : `${formatINR(remaining)} left`}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Compatibility */}
+                  <div className="gaming-card p-3">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <h6 className="text-white fw-bold mb-0">Compatibility</h6>
+                      <span className={`badge ${compatibility.isOk ? 'bg-success' : 'bg-danger'}`}>
+                        {compatibility.isOk ? '100% Compatible' : 'Incompatible'}
+                      </span>
+                    </div>
+                    <div className="small text-secondary mb-2">
+                      Est. Draw: ~{compatibility.estPower}W | Rec. PSU: {compatibility.recPsu}W+
+                    </div>
+                    {compatibility.issues.map((issue, idx) => (
+                      <div key={idx} className="alert alert-danger p-2 small mb-1">{issue}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: SAVED */}
+          {view === 'saved' && (
+            <div className="container py-4">
+              <h3 className="text-white fw-bold mb-4">Saved Configurations ({savedBuilds.length})</h3>
+              {savedBuilds.length === 0 ? (
+                <div className="gaming-card p-5 text-center">
+                  <p className="text-secondary">No saved builds yet. Customize one in the PC Builder and hit "Save Build"!</p>
+                  <button className="btn btn-neon" onClick={() => setView('builder')}>Go to Builder</button>
+                </div>
+              ) : (
+                <div className="row g-4">
+                  {savedBuilds.map(b => (
+                    <div key={b.id} className="col-md-6 col-lg-4">
+                      <div className="gaming-card p-4 h-100 d-flex flex-column">
+                        <div className="d-flex justify-content-between align-items-start mb-2">
+                          <h5 className="text-white fw-bold mb-0">{b.name}</h5>
+                          <span className="badge bg-dark border border-secondary text-secondary">{b.date}</span>
+                        </div>
+                        <div className="text-secondary small mb-3 flex-grow-1">
+                          <div>CPU: {b.components?.cpu?.name || 'None'}</div>
+                          <div>GPU: {b.components?.gpu?.name || 'None'}</div>
+                          <div>RAM: {b.components?.ram?.name || 'None'}</div>
+                        </div>
+                        <div className="d-flex justify-content-between align-items-center pt-2 border-top border-secondary">
+                          <span className="fs-5 fw-bold text-neon">{formatINR(b.total)}</span>
+                          <div className="d-flex gap-2">
+                            <button className="btn btn-sm btn-outline-danger" onClick={() => handleDeleteSaved(b.id)}><i className="bi bi-trash"></i></button>
+                            <button className="btn btn-sm btn-neon" onClick={() => { setSelectedComponents(b.components); setBuildName(b.name); setView('builder'); }}>Load</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* VIEW: COMPARE */}
+          {view === 'compare' && (
+            <div className="container py-4">
+              <h3 className="text-white fw-bold mb-4">Compare Configurations</h3>
+              <div className="gaming-card p-4">
+                <p className="text-secondary small">Compare your Active Build against preset builds side-by-side.</p>
+                <div className="table-responsive">
+                  <table className="table table-dark table-bordered">
+                    <thead>
+                      <tr>
+                        <th>Category</th>
+                        <th className="text-info">{buildName} (Active)</th>
+                        <th className="text-info">Budget Esports Rig</th>
+                        <th className="text-info">1080p Ultra Gaming PC</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="fw-bold">Total Price</td>
+                        <td className="text-neon fw-bold">{formatINR(grandTotal)}</td>
+                        <td className="text-neon fw-bold">{formatINR(PRESET_BUILDS[0].price)}</td>
+                        <td className="text-neon fw-bold">{formatINR(PRESET_BUILDS[1].price)}</td>
+                      </tr>
+                      {CATEGORIES.map(cat => (
+                        <tr key={cat.id}>
+                          <td className="text-secondary">{cat.name.split(' ')[0]}</td>
+                          <td>{selectedComponents[cat.id]?.name || '—'}</td>
+                          <td>{COMPONENTS_DATA[cat.id]?.find(c => c.id === PRESET_BUILDS[0].comps[cat.id])?.name || '—'}</td>
+                          <td>{COMPONENTS_DATA[cat.id]?.find(c => c.id === PRESET_BUILDS[1].comps[cat.id])?.name || '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* VIEW: SUMMARY */}
+          {view === 'summary' && (
+            <div className="container py-4">
+              <div className="d-flex justify-content-between align-items-center mb-4 no-print">
+                <h3 className="text-white fw-bold mb-0">Build Specification Sheet</h3>
+                <div className="d-flex gap-2">
+                  <button className="btn btn-sm btn-outline-light" onClick={() => window.print()}><i className="bi bi-printer me-1"></i> Print / PDF</button>
+                  <button className="btn btn-sm btn-neon" onClick={() => setView('builder')}>Back to Builder</button>
+                </div>
+              </div>
+
+              <div className="gaming-card p-5">
+                <div className="d-flex justify-content-between align-items-start border-bottom border-secondary pb-3 mb-4">
+                  <div>
+                    <h2 className="brand-font text-white">RIG<span className="text-neon">FORGE</span></h2>
+                    <h4 className="text-info">{buildName}</h4>
+                  </div>
+                  <div className="text-end text-secondary small">
+                    <div>Date: {new Date().toLocaleDateString('en-IN')}</div>
+                    <div>Components: {selectedCount} of 8 Selected</div>
+                  </div>
+                </div>
+
+                <div className="table-responsive mb-4">
+                  <table className="table table-dark table-striped">
+                    <thead>
+                      <tr>
+                        <th>Category</th>
+                        <th>Hardware Component</th>
+                        <th className="text-end">Price</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {CATEGORIES.map(cat => {
+                        const item = selectedComponents[cat.id];
+                        return (
+                          <tr key={cat.id}>
+                            <td className="text-secondary fw-semibold">{cat.name.split(' ')[0]}</td>
+                            <td>{item ? <span><strong>{item.name}</strong> <span className="text-secondary small d-block">{item.specs}</span></span> : '—'}</td>
+                            <td className="text-end text-neon fw-bold">{item ? formatINR(item.price) : '—'}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="d-flex justify-content-end">
+                  <div className="p-3 bg-black rounded border border-secondary" style={{ minWidth: '280px' }}>
+                    <div className="d-flex justify-content-between small text-secondary mb-1">
+                      <span>Subtotal:</span>
+                      <span className="text-white">{formatINR(subtotal)}</span>
+                    </div>
+                    {includeGst && (
+                      <div className="d-flex justify-content-between small text-secondary mb-1">
+                        <span>GST (18%):</span>
+                        <span className="text-info">{formatINR(gstAmount)}</span>
+                      </div>
+                    )}
+                    <div className="d-flex justify-content-between fs-5 fw-bold text-white pt-2 border-top border-secondary">
+                      <span>Grand Total:</span>
+                      <span className="text-neon">{formatINR(grandTotal)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <footer className="border-top border-secondary border-opacity-25 py-4 mt-5 bg-black text-center text-secondary small no-print">
+            <div className="container">
+              <p className="mb-1">RigForge Gaming PC Builder &bull; College Web Programming Subject</p>
+              <p className="mb-0">Built with React.js, Bootstrap 5, and Browser LocalStorage</p>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,228 @@
+/* =========================================================
+   Gaming PC Builder - Custom Styling & Neon Gaming Theme
+   ========================================================= */
+
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+
+:root {
+  --gaming-bg-dark: #0a0d14;
+  --gaming-card-bg: #121824;
+  --gaming-card-hover: #182234;
+  --gaming-border: #1e293b;
+  --gaming-cyan: #00d2ff;
+  --gaming-blue: #2563eb;
+  --gaming-glow: rgba(0, 210, 255, 0.25);
+  --gaming-accent: #38bdf8;
+  --font-gaming: 'Rajdhani', sans-serif;
+  --font-heading: 'Orbitron', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--gaming-bg-dark);
+  color: #e2e8f0;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .brand-font {
+  font-family: var(--font-heading);
+  letter-spacing: 0.5px;
+}
+
+.sub-font {
+  font-family: var(--font-gaming);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Glassmorphism / Cyber Cards */
+.gaming-card {
+  background-color: var(--gaming-card-bg);
+  border: 1px solid var(--gaming-border);
+  border-radius: 12px;
+  transition: all 0.25s ease-in-out;
+}
+
+.gaming-card:hover {
+  border-color: rgba(0, 210, 255, 0.4);
+  box-shadow: 0 8px 24px var(--gaming-glow);
+  transform: translateY(-2px);
+}
+
+.gaming-card.selected-active {
+  border-color: var(--gaming-cyan);
+  box-shadow: 0 0 20px var(--gaming-glow);
+  background: linear-gradient(145deg, #121d2d, #121824);
+}
+
+/* Neon accents and text */
+.text-neon {
+  color: var(--gaming-cyan) !important;
+  text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Buttons */
+.btn-neon {
+  background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-neon:hover {
+  background: linear-gradient(135deg, #00d2ff 0%, #0096c7 100%);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(0, 210, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-outline-neon {
+  background: transparent;
+  color: var(--gaming-cyan);
+  border: 1px solid var(--gaming-cyan);
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-neon:hover {
+  background-color: var(--gaming-cyan);
+  color: #0b0f19;
+  box-shadow: 0 0 15px var(--gaming-glow);
+}
+
+/* Navbar */
+.navbar-gaming {
+  background-color: rgba(10, 13, 20, 0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--gaming-border);
+}
+
+.nav-link {
+  font-weight: 500;
+  color: #94a3b8 !important;
+  transition: color 0.2s;
+  padding: 0.5rem 1rem !important;
+  border-radius: 6px;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #00d2ff !important;
+  background-color: rgba(0, 210, 255, 0.08);
+}
+
+/* Component Selector Category Tab */
+.category-tab {
+  background: #111827;
+  border: 1px solid #1f2937;
+  border-radius: 10px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  width: 100%;
+}
+
+.category-tab:hover {
+  background: #1a2233;
+  border-color: #38bdf8;
+}
+
+.category-tab.active {
+  background: linear-gradient(90deg, #13273e 0%, #111e2f 100%);
+  border-color: var(--gaming-cyan);
+  box-shadow: 0 0 14px rgba(0, 210, 255, 0.25);
+}
+
+/* Fallback badge/image */
+.hardware-img-container {
+  height: 160px;
+  background-color: #0d121c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  border-top-left-radius: 11px;
+  border-top-right-radius: 11px;
+}
+
+.hardware-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.gaming-card:hover .hardware-img-container img {
+  transform: scale(1.05);
+}
+
+/* Progress bar glowing */
+.progress {
+  background-color: #1e293b;
+  border-radius: 20px;
+  height: 12px;
+}
+
+.progress-bar-glow-green {
+  background: linear-gradient(90deg, #10b981, #059669);
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.progress-bar-glow-yellow {
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+.progress-bar-glow-red {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.7);
+}
+
+/* Toast container */
+.custom-toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1090;
+}
+
+/* Print styling for Build Summary */
+@media print {
+  body {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+  }
+  .navbar-gaming,
+  .no-print,
+  .btn,
+  footer {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .gaming-card {
+    border: 1px solid #ccc !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #000 !important;
+  }
+  .text-neon, .text-gradient {
+    color: #0284c7 !important;
+    -webkit-text-fill-color: initial !important;
+  }
+}
